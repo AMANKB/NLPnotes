@@ -1,16 +1,14 @@
 ## Attention机制
 
 Attention Mechanism与人类对外界事物的观察机制很类似，当人类观察外界事物的时候，一般不会把事物当成一个整体去看，往往倾向于根据需要选择性的去获取被观察
-事物的某些重要部分，比如我们看到一个人时，往往先Attention到这个人的脸，然后再把不同区域的信息组合起来，形成一个对被观察事物的整体印象。因此Attention 
-Mechanism可以帮助模型对输入的X每个部分赋予不同的权重，抽取出更加关键及重要的信息，使模型做出更加准确的判断，同时不会对模型的计算和存储
-带来更大的开销.
+事物的某些重要部分，比如我们看到一个人时，往往先Attention到这个人的脸，然后再把不同区域的信息组合起来，形成一个对被观察事物的整体印象。**因此Attention 
+Mechanism可以帮助模型对输入的X每个部分赋予不同的权重，抽取出更加关键及重要的信息，使模型做出更加准确的判断，同时不会对模型的计算和存储带来更大的开销.**
 
 ### 为什么需要机制Attention
 
-提出Attention机制是因为原有的seq2seq模型所存在的一些问题。下图是一个经典的seq2seq模型，源自论文《Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation
-》<https://arxiv.org/abs/1406.1078>
+提出Attention机制是因为原有的seq2seq模型所存在的一些问题。下图是一个经典的seq2seq模型，源自论文[《Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation》](https://arxiv.org/abs/1406.1078)
 
-![seq2seq2](BERT-notes/images/seq2seq.png)
+![seq2seq2](./images/seq2seq.PNG)
 图1 经典的seq2seq2模型
 
 其中，Encoder把一个变成的输入序列x1，x2，x3....xt编码成一个固定长度隐向量（背景向量，或上下文向量context）c，c有两个作用：
