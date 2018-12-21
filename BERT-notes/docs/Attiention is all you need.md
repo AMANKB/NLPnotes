@@ -91,9 +91,12 @@ scaled dot-Product attention就是我们常用的使用点积进行相似度计�
 
 对上面式子的理解：$\boldsymbol{Q}\in\mathbb{R}^{n\times d_k}, \boldsymbol{K}\in\mathbb{R}^{m\times d_k}, \boldsymbol{V}\in\mathbb{R}^{m\times d_v}$.如果忽略激活函数softmax的话，那么事实上它就是三个$\times d_k,d_k\times m, m\times d_v$矩阵相乘，
 最后的结果是一个$n\times d_v$的矩阵。所以这里的操作可以被看作是**一个Attention层，将$n\times d_k$的序列$\boldsymbol{Q}$编码成了一个新的$n\times d_v$的序列。**
-通过单个向量来看的话，
-$$Attention(\boldsymbol{q}_t,\boldsymbol{K},\boldsymbol{V}) = \sum_{s=1}^m \frac{1}{Z}\exp\left(\frac{\langle\boldsymbol{q}_t, \boldsymbol{k}_s\rangle}{\sqrt{d_k}}\right)\boldsymbol{v}_s$$
-其中Z是归一化因子。事实上q,k,v分别是query,key,value的简写，K,V是一一对应的，它们就像是key-value的关系，那么上式的意思就是通过qt这个query，通过与各个ks内积的并softmax的方式，来得到$q_t$与各个$v_s$的相似度，然后加权求和，得到一个$d_v$维的向量。
+通过单个向量来看的话，公式如下
+
+$ Attention(\boldsymbol{q}_t,\boldsymbol{K},\boldsymbol{V}) = \sum_{s=1}^m \frac{1}{Z}\exp\left(\frac{\langle\boldsymbol{q}_t, \boldsymbol{k}_s\rangle}{\sqrt{d_k}}\right)\boldsymbol{v}_s $
+
+其中Z是归一化因子。事实上q,k,v分别是query,key,value的简写，K,V是一一对应的，它们就像是key-value的关系，那么上式的意思就是通过qt这个query，通过与各个ks内积的并softmax的方式，来得到 $q_t$ 与各个 $v_s$ 的相似度，然后加权求和，得到一个$d_v$维的向量。
+
 #### 2. Multi-head attention
 多头attention（Multi-head attention）结构如下图，Query，Key，Value首先进过一个线性变换，然后输入到放缩点积attention，注意这里要做h次，其实也就是所谓的多头，每一次算一个头。而且每次Q，K，V进行线性变换的参数W是不一样的(**参数不共享**)。然后**将h次的放缩点积attention结果进行拼接**，再进行一次线性变换得到的值作为多头attention的结果。可以看到，google提出来的多头attention的不同之处在于进行了h次计算而不仅仅算一次，论文中说到这样的好处是可以允许模型在不同的表示子空间里学习到相关的信息，后面还会根据attention可视化来验证。
 
