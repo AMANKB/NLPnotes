@@ -39,26 +39,52 @@ Mechanism可以帮助模型对输入的X每个部分赋予不同的权重，抽�
 
 ### self-Attention
 
-Self Attention与传统的Attention机制非常的不同：传统的Attention是基于source端和target端的隐变量（hidden state）计算Attention的，得到的结果是源端的每个词与目标端每个词之间的依赖关系。但Self Attention不同，它分别在source端和target端进行，仅与source input或者target input自身相关的Self Attention，捕捉source端或target端自身的词与词之间的依赖关系；然后再把source端的得到的self Attention加入到target端得到的Attention中，捕捉source端和target端词与词之间的依赖关系。因此，self Attention Attention比传统的Attention mechanism效果要好，主要原因之一是，传统的Attention机制忽略了源端或目标端句子中词与词之间的依赖关系，相对比，self Attention可以不仅可以得到源端与目标端词与词之间的依赖关系，同时还可以有效获取源端或目标端自身词与词之间的依赖关系。
+Self Attention与传统的Attention机制的不同在于：传统的Attention是基于source端和target端的隐变量（hidden state）计算Attention的，得到的结果是源端的每个词与目标端每个词之间的依赖关系。但Self Attention不同，它分别在source端和target端进行，仅与source input或者target input自身相关的Self Attention，捕捉source端或target端自身的词与词之间的依赖关系，也就是**在序列的内部做Attention，寻找序列内部的联系**；然后再把source端的得到的self Attention加入到target端得到的Attention中，捕捉source端和target端词与词之间的依赖关系。因此，self Attention Attention比传统的Attention mechanism效果要好，主要原因之一是，传统的Attention机制忽略了源端或目标端句子中词与词之间的依赖关系，相对比，self Attention可以不仅可以得到源端与目标端词与词之间的依赖关系，同时还可以有效获取源端或目标端自身词与词之间的依赖关系。
 在Google提出的论文[《Attention is all you need》](https://arxiv.org/abs/1706.03762)中提出了一个新的完全基于注意力机制的机器翻译模型，其亮点在于有：1）不同于以往主流机器翻译使用基于RNN的seq2seq模型框架，该论文用attention机制代替了RNN搭建了整个模型框架。2）提出了多头注意力（Multi-headed attention）机制方法，在编码器和解码器中大量的使用了多头自注意力机制（Multi-headed self-attention）。3）在WMT2014语料中的英德和英法任务上取得了先进结果，并且训练速度比主流模型更快。通过对论文的阅读可以很好地去理解self-Attention的机理和强大之处。
 在这篇论文中提到Attention函数的本质可以被描述为一个查询（query）到一系列（键key-值value）对的映射，如下图。
 
-![attention_essence](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_1.PNG)
+![attention_essence_1](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_1.PNG)
+
+在计算attention时主要分为三步，第一步是将query和每个key进行相似度计算得到权重，常用的相似度函数有点积，拼接，感知机等；然后第二步一般是使用一个softmax函数对这些权重进行归一化；最后将权重和相应的键值value进行加权求和得到最后的attention。目前在NLP研究中，key和value常常都是同一个，即key=value。
+
+![attention_essence_2](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_2.PNG)
+
+该论文模型的整体结构如下图，还是由编码器和解码器组成，在编码器的一个网络块中，由一个多头attention子层和一个前馈神经网络子层组成，整个编码器栈式搭建了N个块。类似于编码器，只是解码器的一个网络块中多了一个多头attention层。为了更好的优化深度网络，整个网络使用了残差连接和对层进行了规范化（Add&Norm）。
+
+![model_architecture](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_6.PNG)
 
 #### 1. scaled dot-Product attention
-scaled dot-Product attention就是我们常用的使用点积进行相似度计算的attention，只是多除了一个（为K的维度）起到调节作用，其作用在于：减小内积的大小。**防止当 dk 比较大时点乘结果太大导致有效梯度太大（或被忽略、裁剪）**。对于为什么除以的是根号d_k，在论文下方的注释里提到：假设两个 d_k 维向量每个分量都是一个相互独立的服从标准正态分布的随机变量，那么他们的点乘的方差就是 d_k，每一个分量除以 sqrt(d_k) 可以让点乘的方差变成 1。
+scaled dot-Product attention就是我们常用的使用点积进行相似度计算的attention，只是多除了一个（为K的维度）起到调节作用，其作用在于：减小内积的大小。**防止当 dk 比较大时点乘结果太大导致有效梯度太大（或被忽略、裁剪）**。对于为什么除以的是根号$d_k$，在论文下方的注释里提到：假设两个 d_k 维向量每个分量都是一个相互独立的服从标准正态分布的随机变量，那么他们的点乘的方差就是$d_k$个分量除以$sqrt {{d_k}}$以让点乘的方差变成 1。
 
-![scaled dot-Product attention](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_2.PNG)
+![scaled dot-Product attention](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_3.png)
 
+对上面式子的理解：$\boldsymbol{Q}\in\mathbb{R}^{n\times d_k}, \boldsymbol{K}\in\mathbb{R}^{m\times d_k}, \boldsymbol{V}\in\mathbb{R}^{m\times d_v}$.如果忽略激活函数softmax的话，那么事实上它就是三个$\times d_k,d_k\times m, m\times d_v$矩阵相乘，
+最后的结果是一个$n\times d_v$的矩阵。所以这里的操作可以被看作是**一个Attention层，将$n\times d_k$的序列$\boldsymbol{Q}$编码成了一个新的$n\times d_v$的序列。**
+通过单个向量来看的话，
+$$Attention(\boldsymbol{q}_t,\boldsymbol{K},\boldsymbol{V}) = \sum_{s=1}^m \frac{1}{Z}\exp\left(\frac{\langle\boldsymbol{q}_t, \boldsymbol{k}_s\rangle}{\sqrt{d_k}}\right)\boldsymbol{v}_s$$
+其中Z是归一化因子。事实上q,k,v分别是query,key,value的简写，K,V是一一对应的，它们就像是key-value的关系，那么上式的意思就是通过qt这个query，通过与各个ks内积的并softmax的方式，来得到$q_t$与各个$v_s$的相似度，然后加权求和，得到一个$d_v$维的向量。
 #### 2. Multi-head attention
-多头attention（Multi-head attention）结构如下图，Query，Key，Value首先进过一个线性变换，然后输入到放缩点积attention，注意这里要做h次，其实也就是所谓的多头，每一次算一个头。而且每次Q，K，V进行线性变换的参数W是不一样的。然后将h次的放缩点积attention结果进行拼接，再进行一次线性变换得到的值作为多头attention的结果。可以看到，google提出来的多头attention的不同之处在于进行了h次计算而不仅仅算一次，论文中说到这样的好处是可以允许模型在不同的表示子空间里学习到相关的信息，后面还会根据attention可视化来验证。
+多头attention（Multi-head attention）结构如下图，Query，Key，Value首先进过一个线性变换，然后输入到放缩点积attention，注意这里要做h次，其实也就是所谓的多头，每一次算一个头。而且每次Q，K，V进行线性变换的参数W是不一样的(**参数不共享**)。然后**将h次的放缩点积attention结果进行拼接**，再进行一次线性变换得到的值作为多头attention的结果。可以看到，google提出来的多头attention的不同之处在于进行了h次计算而不仅仅算一次，论文中说到这样的好处是可以允许模型在不同的表示子空间里学习到相关的信息，后面还会根据attention可视化来验证。
 
-![Multi-head attention](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_3.PNG)
+![Multi-head attention](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_4.png)
 
+这里的$\boldsymbol{W}_i^Q\in\mathbb{R}^{d_k\times \tilde{d}_k}, \boldsymbol{W}_i^K\in\mathbb{R}^{d_k\times \tilde{d}_k}, \boldsymbol{W}_i^V\in\mathbb{R}^{d_v\times \tilde{d}_v}$
 那么在整个模型中，是如何使用attention的呢？如下图，首先在编码器到解码器的地方使用了多头attention进行连接，K，V，Q分别是编码器的层输出（这里K=V）和解码器中都头attention的输入。其实就和主流的机器翻译模型中的attention一样，利用解码器和编码器attention来进行翻译对齐。然后在编码器和解码器中都使用了多头自注意力self-attention来学习文本的表示。Self-attention即K=V=Q，例如输入一个句子，那么里面的每个词都要和该句子中的所有词进行attention计算。目的是学习句子内部的词依赖关系，捕获句子的内部结构。
 那么在整个模型中，是如何使用attention的呢？如下图，首先在编码器到解码器的地方使用了多头attention进行连接，K，V，Q分别是编码器的层输出（这里K=V）和解码器中都头attention的输入。其实就和主流的机器翻译模型中的attention一样，利用解码器和编码器attention来进行翻译对齐。然后在编码器和解码器中都使用了多头自注意力self-attention来学习文本的表示。Self-attention即K=V=Q，例如输入一个句子，那么里面的每个词都要和该句子中的所有词进行attention计算。目的是学习句子内部的词依赖关系，捕获句子的内部结构。
 
-![Attention in model](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_4.PNG)
+![Attention in model](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/Attention_5.png)
 
 对于使用自注意力机制的原因，论文中提到主要从三个方面考虑（每一层的复杂度，是否可以并行，长距离依赖学习），并给出了和RNN，CNN计算复杂度的比较。可以看到，如果输入序列n小于表示维度d的话，每一层的时间复杂度self-attention是比较有优势的。当n比较大时，作者也给出了一种解决方案self-attention（restricted）即每个词不是和所有词计算attention，而是只与限制的r个词去计算attention。在并行方面，多头attention和CNN一样不依赖于前一时刻的计算，可以很好的并行，优于RNN。在长距离依赖上，由于self-attention是每个词和所有词都要计算attention，所以不管他们中间有多长距离，最大的路径长度也都只是1。可以捕获长距离依赖关系。
+#### 3. Position Embedding
+但是仅依靠以上描述构建出来的Attention模型其实**并不能捕捉到序列的顺序**。如果将$\boldsymbol{K},\boldsymbol{V}$按行打乱顺序，相当于打乱了句子中的词序，那么通过上面的模型得到的结果还是一样的。为了解决这个问题，Google提出了Position Embedding,即“位置向量”(实际上，这种位置向量在先前的很多论文中也有，但google提出的有所不同)。其将序列的每个位置进行编号，一个编号对应一个向量，通过结合位置向量和词向量，就给每个词都引入了一定的位置信息，这样Attention就可以分辨出不同位置的词了。Google提出的Position Embedding在于：
+1. 在RNN、CNN模型中都曾出现过Position Embedding，但由于RNN、CNN本身就能捕捉到位置信息，因此Position Embedding只是起到一个辅助的作用。
+但是在Google提出的这个纯Attention模型中，Position Embedding是位置信息的唯一来源，因此它是模型的核心成分之一，并非仅仅是简单的辅助手段。
+2. 在以往的Position Embedding中，基本都是根据任务训练出来的向量。而Google直接给出了一个构造Position Embedding的公式：
+
+![position_embedding](https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/position_embedding.png)
+
+这里的意思是将id为$\boldsymbol{p}$的位置映射为一个$\boldsymbol{d_pos}$维的位置向量，这个向量的第i个元素的数值就是$\boldsymbol{PE_(2i,p)}$.
+3. 论文中还提到选择这样的一个位置向量公式的重要原因在于：**Position Embedding尽管本身是代表的是一个绝对位置的信息，但是它能提供表达相对位置信息的可能性。**这一点可以从正弦的三角函数公式看到，$\sin(\alpha+\beta)=\sin\alpha\cos\beta+\cos\alpha\sin\beta$
+和$\cos(\alpha+\beta)=\cos\alpha\cos\beta-\sin\alpha\sin\beta$,这表明位置$p+k$的向量可以表示成位置$p$的向量的线性变换。
+
 
