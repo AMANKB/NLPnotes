@@ -6,10 +6,10 @@ Mechanism可以帮助模型对输入的X每个部分赋予不同的权重，抽�
 
 ### seq2seq模型
 
-提出Attention机制是因为原有的seq2seq模型所存在的一些问题。所以理解seq2seq的优缺点是必要的。下图是一个经典的seq2seq模型，源自论文[《Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation》](https://arxiv.org/abs/1406.1078)
+提出Attention机制是因为原有的seq2seq模型所存在的一些问题。所以理解seq2seq的优缺点是必要的。下图是一个seq2seq模型的框架，源自论文[《Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation》](https://arxiv.org/abs/1406.1078)
 
 <div align=center>
-<img src="https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/seq2seq.PNG"/>
+<img width="400" hegiht="250" src="https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/seq2seq.PNG"/>
 </div>
 
 其中，Encoder把一个变成的输入序列x1，x2，x3....xt编码成一个固定长度隐向量（背景向量，或上下文向量context）c，c有两个作用：
@@ -17,10 +17,11 @@ Mechanism可以帮助模型对输入的X每个部分赋予不同的权重，抽�
 * 做为背景向量，指导y序列中每一个step的y的产出。Decoder主要基于背景向量c和上一步的输出yt-1解码得到该时刻t的输出yt，直到碰到结束标志（<EOS>）为止。
 《Sequence to Sequence Learning with Neural Networks》介绍了一种基于RNN的Seq2Seq模型，基于一个Encoder和一个Decoder来构建基于神经网络的End-to-End的机器翻译模型，其中，Encoder把输入X编码成一个固定长度的隐向量Z，Decoder基于隐向量Z解码出目标输出Y。
 
-整个的流程用下图来看更容易理解：
+一个典型的用于机器翻译的seq2seq模型如下：
 
 <div align=center>
-<src="https://raw.githubusercontent.com/AMANKB/NLPnotes/master/BERT-notes/images/seq2seq_3.png"/>
+<img width="400" hegiht="250" src="D:\github_home\NLPnotes\BERT-notes\images
+translation.png"/>
 </div>
 
 1. 所有输出端，都以一个通用的<start>标记开头，以<end>标记结尾，这两个标记也视为一个词/字；
