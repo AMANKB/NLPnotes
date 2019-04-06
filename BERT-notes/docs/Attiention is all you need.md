@@ -94,7 +94,7 @@ scaled dot-Product attention就是我们常用的使用点积进行相似度计�
 最后的结果是一个$n\times d_v$的矩阵。所以这里的操作可以被看作是**一个Attention层，将$n\times d_k$的序列$\boldsymbol{Q}$编码成了一个新的$n\times d_v$的序列。**
 通过单个向量来看的话，公式如下
 
-$ Attention(\boldsymbol{q}_t,\boldsymbol{K},\boldsymbol{V}) = \sum_{s=1}^m \frac{1}{Z}\exp\left(\frac{\langle\boldsymbol{q}_t, \boldsymbol{k}_s\rangle}{\sqrt{d_k}}\right)\boldsymbol{v}_s $
+$$Attention(\boldsymbol{q}_t,\boldsymbol{K},\boldsymbol{V})=\sum_{s=1}^m \frac{1}{Z}\exp\left(\frac{\langle\boldsymbol{q}_t, \boldsymbol{k}_s\rangle}{\sqrt{d_k}}\right)\boldsymbol{v}_s$$
 
 其中Z是归一化因子。事实上q,k,v分别是query,key,value的简写，K,V是一一对应的，它们就像是key-value的关系，那么上式的意思就是通过qt这个query，通过与各个ks内积的并softmax的方式，来得到 $q_t$ 与各个 $v_s$ 的相似度，然后加权求和，得到一个$d_v$维的向量。
 
